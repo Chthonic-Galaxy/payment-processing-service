@@ -37,9 +37,9 @@ class SLQAlchemyPaymentRepository(AbstractPaymentRepository):
 
     async def get(self, payment_id: str) -> PaymentEntity | None:
         stmt = select(PaymentModel).where(PaymentModel.id == payment_id)
-        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        payment = (await self.session.execute(stmt)).scalar_one_or_none()
 
-        if not result:
-            return result
+        if not payment:
+            return payment
 
-        return self.__mapper_dao_to_dm(result)
+        return self.__mapper_dao_to_dm(payment)
