@@ -1,7 +1,7 @@
 [project]
 name = "async-payment-processing-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Async payment processing microservice with Outbox pattern and RabbitMQ"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -12,3 +12,23 @@ dependencies = [
     "sqlalchemy>=2.0.49",
     "uuid-utils>=0.14.1",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.0",
+    "ruff>=0.15.10",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"] # Ignore line too long
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unused_configs = true
+plugins = ["pydantic.mypy"]
