@@ -37,12 +37,12 @@ class Payment(BaseModel):
     webhook_url: HttpUrl
 
     created_at: datetime = Field(default_factory=utc_now)
-    procecssed_at: datetime | None = None
+    processed_at: datetime | None = None
 
     def mark_as_succeeded(self) -> None:
         self.status = PaymentStatus.SUCCEEDED
-        self.procecssed_at = utc_now()
+        self.processed_at = utc_now()
 
     def mark_as_failed(self) -> None:
         self.status = PaymentStatus.FAILED
-        self.procecssed_at = utc_now()
+        self.processed_at = utc_now()
