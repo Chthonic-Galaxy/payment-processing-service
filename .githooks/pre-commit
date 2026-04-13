@@ -28,3 +28,6 @@ uv run --frozen --group dev ruff format --check .
 
 echo "Running mypy..."
 uv run --frozen --group dev mypy
+
+echo "Running pytest..."
+uv run --frozen --group dev pytest -v -s
