@@ -49,6 +49,8 @@ class SQLAlchemyPaymentRepository(AbstractPaymentRepository):
             )
         )
 
+        await self.session.flush()
+
     async def get(self, payment_id: str) -> PaymentEntity | None:
         stmt = select(PaymentModel).where(PaymentModel.id == payment_id)
         payment = (await self.session.execute(stmt)).scalar_one_or_none()
