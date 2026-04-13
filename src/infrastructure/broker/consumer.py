@@ -7,7 +7,7 @@ from faststream.rabbit import RabbitBroker, RabbitQueue
 
 from src.core.entities.payment import PaymentStatus
 from src.infrastructure.database.connection import async_session_factory
-from src.infrastructure.database.repositories.payments import SLQAlchemyPaymentRepository
+from src.infrastructure.database.repositories.payments import SQLAlchemyPaymentRepository
 from src.infrastructure.webhook.client import WebhookClient
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ async def process_payment(message: dict[str, Any]) -> None:
     new_status = PaymentStatus.SUCCEEDED if is_success else PaymentStatus.FAILED
 
     async with async_session_factory.begin() as session:
-        repo = SLQAlchemyPaymentRepository(session)
+        repo = SQLAlchemyPaymentRepository(session)
         await repo.update_status(payment_id=payment_id, status=new_status)  # pyright: ignore[reportArgumentType]
 
     logger.info(f"Payment {payment_id} processed with status: {new_status.value}")

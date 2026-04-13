@@ -9,7 +9,7 @@ from src.infrastructure.database.models import Payment as PaymentModel
 from src.utils import utc_now
 
 
-class SLQAlchemyPaymentRepository(AbstractPaymentRepository):
+class SQLAlchemyPaymentRepository(AbstractPaymentRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
