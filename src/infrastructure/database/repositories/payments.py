@@ -102,7 +102,7 @@ class SQLAlchemyPaymentRepository(AbstractPaymentRepository):
 
         if not payment:
             logger.debug("Payment %s was not found in the database", payment_id)
-            return payment
+            return None
 
         logger.debug("Payment %s loaded from the database", payment_id)
         return self.__mapper_dao_to_dm(payment)

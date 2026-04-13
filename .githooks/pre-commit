@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv is required to run git hooks." >&2
+    exit 1
+fi
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+export UV_CACHE_DIR="${UV_CACHE_DIR:-${TMPDIR:-/tmp}/uv-cache}"
+
+mapfile -d '' STAGED_PYTHON_FILES < <(
+    git diff --cached --name-only --diff-filter=ACMR -z -- '*.py'
+)
+
+if [[ ${#STAGED_PYTHON_FILES[@]} -eq 0 ]] && git diff --cached --quiet -- pyproject.toml; then
+    exit 0
+fi
+
+echo "Running ruff check..."
+uv run --frozen --group dev ruff check .
+
+echo "Running ruff format check..."
+uv run --frozen --group dev ruff format --check .
+
+echo "Running mypy..."
+uv run --frozen --group dev mypy

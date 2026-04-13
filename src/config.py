@@ -21,15 +21,15 @@ def read_password(name: Literal["pg_password", "rabbitmq_password"]) -> str | No
         Secret value if a matching file exists, otherwise `None`.
     """
 
-    try:
-        if Path(f"/run/secrets/{name}").exists():
-            with open(f"/run/secrets/{name}", "r", encoding="utf-8") as f:
-                return f.read().strip()
-        elif Path(f"./secrets/{name}.txt").exists():
-            with open(f"./secrets/{name}.txt", "r", encoding="utf-8") as f:
-                return f.read().strip()
-    except Exception:
-        raise
+    docker_secret = Path(f"/run/secrets/{name}")
+    if docker_secret.exists():
+        return docker_secret.read_text(encoding="utf-8").strip()
+
+    local_secret = Path(f"./secrets/{name}.txt")
+    if local_secret.exists():
+        return local_secret.read_text(encoding="utf-8").strip()
+
+    return None
 
 
 class DBSettings(BaseModel):
@@ -46,7 +46,7 @@ class DBSettings(BaseModel):
     pool_size: int
     pool_pre_ping: bool
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def url(self) -> str:
         """Build the async SQLAlchemy database URL."""
@@ -74,7 +74,7 @@ class MsgBrSettings(BaseModel):
     port: int
     vhost: str
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def url(self) -> str:
         """Build the broker URL."""
@@ -106,7 +106,7 @@ class Settings(BaseSettings):
     # Message Broker
     broker: MsgBrSettings
 
-    app_api_key: SecretStr = "secret-key"  # pyright: ignore[reportAssignmentType]
+    app_api_key: SecretStr = SecretStr("secret-key")
 
 
 @lru_cache

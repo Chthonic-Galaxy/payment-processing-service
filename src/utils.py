@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from uuid_utils import uuid7
 
@@ -13,4 +13,4 @@ def uuid_v7() -> uuid.UUID:
 def utc_now() -> datetime:
     """Return the current UTC datetime."""
 
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

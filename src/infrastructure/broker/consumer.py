@@ -40,6 +40,14 @@ async def process_payment(message: dict[str, Any]) -> None:
     payment_id = message.get("id")
     webhook_url = message.get("webhook_url")
 
+    if not isinstance(payment_id, str):
+        logger.error("Received payment message without a valid string id")
+        raise ValueError("Payment message must include a string id")
+
+    if not isinstance(webhook_url, str):
+        logger.error("Received payment %s without a valid webhook URL", payment_id)
+        raise ValueError("Payment message must include a string webhook URL")
+
     logger.info("Received payment %s for processing", payment_id)
 
     processing_time = random.uniform(2, 5)

@@ -23,7 +23,7 @@ async def create_payment(
     request: PaymentCreateRequest,
     service: Annotated[PaymentService, Depends(get_payment_service)],
     idempotency_key: str = Header(..., alias="Idempotency-Key"),
-):
+) -> PaymentResponse:
     """Create a new payment.
 
     Args:
@@ -45,8 +45,7 @@ async def create_payment(
             metadata=request.metadata,
         )
         logger.info("Payment %s accepted for processing", payment.id)
-        return payment
-    except IntegrityError:
+    except IntegrityError as error:
         logger.warning(
             "Payment creation rejected because idempotency key %s already exists",
             idempotency_key,
@@ -54,14 +53,16 @@ async def create_payment(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Payment with this Idempotency-Key already exists.",
-        )
+        ) from error
+
+    return PaymentResponse.model_validate(payment.model_dump())
 
 
 @router.get("/{payment_id}/", response_model=PaymentResponse)
 async def get_payment(
     payment_id: UUID,
     service: Annotated[PaymentService, Depends(get_payment_service)],
-):
+) -> PaymentResponse:
     """Return payment details by ID.
 
     Args:
@@ -76,4 +77,5 @@ async def get_payment(
     if not payment:
         logger.warning("Payment %s not found", payment_id)
         raise HTTPException(status_code=404, detail="Payment not found")
-    return payment
+
+    return PaymentResponse.model_validate(payment.model_dump())
