@@ -7,7 +7,7 @@ from faststream import FastStream
 
 from src.config import settings
 from src.core.entities.payment import PaymentStatus
-from src.infrastructure.broker.rabbit import broker, main_queue
+from src.infrastructure.broker.rabbit import broker, dlq_queue, main_queue
 from src.infrastructure.database.connection import async_session_factory
 from src.infrastructure.database.repositories.payments import SQLAlchemyPaymentRepository
 from src.infrastructure.logger import setup_logging
@@ -19,6 +19,14 @@ logger = logging.getLogger(__name__)
 app = FastStream(broker)
 
 webhook_client = WebhookClient()
+
+
+@app.after_startup
+async def declare_dead_letter_queue() -> None:
+    """Declare the dead-letter queue used by the consumer."""
+
+    await broker.declare_queue(dlq_queue)
+    logger.info("Dead-letter queue %s declared", dlq_queue.name)
 
 
 @broker.subscriber(queue=main_queue)

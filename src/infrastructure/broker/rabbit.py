@@ -4,6 +4,8 @@ from src.config import settings
 
 broker = RabbitBroker(settings.broker.url)
 
+dlq_queue = RabbitQueue(name="payments.dlq")
+
 main_queue = RabbitQueue(
     name="payments.new",
     routing_key="payments.new",
