@@ -1,10 +1,12 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.entities.payment import Payment as PaymentEntity
+from src.core.entities.payment import PaymentStatus
 from src.core.interfaces.payments import AbstractPaymentRepository
 from src.infrastructure.database.models import Outbox
 from src.infrastructure.database.models import Payment as PaymentModel
+from src.utils import utc_now
 
 
 class SLQAlchemyPaymentRepository(AbstractPaymentRepository):
@@ -43,3 +45,11 @@ class SLQAlchemyPaymentRepository(AbstractPaymentRepository):
             return payment
 
         return self.__mapper_dao_to_dm(payment)
+
+    async def update_status(self, payment_id: str, status: PaymentStatus) -> None:
+        stmt = (
+            update(PaymentModel)
+            .where(PaymentModel.id == payment_id)
+            .values(status=status, processed_at=utc_now())
+        )
+        await self.session.execute(stmt)

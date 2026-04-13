@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-from src.core.utils import utc_now, uuid_v7
+from src.utils import utc_now, uuid_v7
 
 
 class Currency(StrEnum):
