@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv is required to run git hooks." >&2
+    exit 1
+fi
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+export UV_CACHE_DIR="${UV_CACHE_DIR:-${TMPDIR:-/tmp}/uv-cache}"
+
+if [[ "${SKIP_PRE_PUSH_TESTS:-0}" == "1" ]]; then
+    echo "Skipping pre-push tests because SKIP_PRE_PUSH_TESTS=1."
+    exit 0
+fi
+
+echo "Checking Docker availability..."
+if ! uv run --frozen --group dev python -c "import docker; docker.from_env().ping()" >/dev/null 2>&1; then
+    echo "Docker is required for pre-push tests. Start Docker or set SKIP_PRE_PUSH_TESTS=1." >&2
+    exit 1
+fi
+
+echo "Running pytest..."
+uv run --frozen --group dev pytest -q
