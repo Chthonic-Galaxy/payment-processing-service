@@ -13,6 +13,8 @@ from src.infrastructure.database.models.base import Base
 
 
 class Payment(Base):
+    """Payment ORM model."""
+
     __tablename__ = "payments"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True)

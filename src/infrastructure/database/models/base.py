@@ -3,6 +3,6 @@ from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    """Base class for all SLQAlchemy ORM models."""
+    """Base class for all SQLAlchemy ORM models."""
 
     pass

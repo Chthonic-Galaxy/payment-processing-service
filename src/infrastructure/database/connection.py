@@ -15,5 +15,11 @@ async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession]:
+    """Yield a transactional database session.
+
+    Yields:
+        Active async SQLAlchemy session.
+    """
+
     async with async_session_factory.begin() as session:
         yield session

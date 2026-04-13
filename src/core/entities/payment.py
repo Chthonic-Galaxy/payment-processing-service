@@ -10,18 +10,24 @@ from src.utils import utc_now, uuid_v7
 
 
 class Currency(StrEnum):
+    """Supported payment currencies."""
+
     RUB = "RUB"
     USD = "USD"
     EUR = "EUR"
 
 
 class PaymentStatus(StrEnum):
+    """Available payment states."""
+
     PENDING = "pending"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
 
 
 class Payment(BaseModel):
+    """Payment domain model."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID = Field(default_factory=uuid_v7)
@@ -40,9 +46,13 @@ class Payment(BaseModel):
     processed_at: datetime | None = None
 
     def mark_as_succeeded(self) -> None:
+        """Mark the payment as successfully processed."""
+
         self.status = PaymentStatus.SUCCEEDED
         self.processed_at = utc_now()
 
     def mark_as_failed(self) -> None:
+        """Mark the payment as failed."""
+
         self.status = PaymentStatus.FAILED
         self.processed_at = utc_now()

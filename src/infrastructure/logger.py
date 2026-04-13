@@ -3,6 +3,12 @@ import logging.config
 
 
 def setup_logging(level: str | int) -> None:
+    """Configure application logging.
+
+    Args:
+        level: Root logging level.
+    """
+
     config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -15,12 +21,13 @@ def setup_logging(level: str | int) -> None:
         "handlers": {
             "stdout": {
                 "class": "logging.StreamHandler",
-                "level": "INFO",
+                "level": f"{level}",
                 "formatter": "default",
                 "stream": "ext://sys.stdout",
             },
             "file": {
                 "class": "logging.FileHandler",
+                "level": f"{level}",
                 "formatter": "default",
                 "filename": "/tmp/a_payment_p_s.log",
                 "mode": "w",

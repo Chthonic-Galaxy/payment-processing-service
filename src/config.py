@@ -11,19 +11,30 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 load_dotenv(find_dotenv())
 
 
-def read_password(name: Literal["pg_password", "rabbitmq_password"]):
+def read_password(name: Literal["pg_password", "rabbitmq_password"]) -> str | None:
+    """Read a secret value from Docker secrets or a local fallback file.
+
+    Args:
+        name: Secret name without file extension.
+
+    Returns:
+        Secret value if a matching file exists, otherwise `None`.
+    """
+
     try:
         if Path(f"/run/secrets/{name}").exists():
-            with open(f"/run/secrets/{name}", "r") as f:
+            with open(f"/run/secrets/{name}", "r", encoding="utf-8") as f:
                 return f.read().strip()
         elif Path(f"./secrets/{name}.txt").exists():
-            with open(f"./secrets/{name}.txt", "r") as f:
+            with open(f"./secrets/{name}.txt", "r", encoding="utf-8") as f:
                 return f.read().strip()
     except Exception:
         raise
 
 
 class DBSettings(BaseModel):
+    """Database connection settings."""
+
     user: str
     password: str = os.getenv("DATABASE__PASSWORD") or read_password("pg_password") or ""
     name: str
@@ -38,6 +49,8 @@ class DBSettings(BaseModel):
     @computed_field
     @property
     def url(self) -> str:
+        """Build the async SQLAlchemy database URL."""
+
         encoded_user = quote_plus(self.user)
 
         encoded_password = quote_plus(self.password)
@@ -53,6 +66,8 @@ class DBSettings(BaseModel):
 
 
 class MsgBrSettings(BaseModel):
+    """Message broker connection settings."""
+
     user: str
     password: str = os.getenv("BROKER__PASSWORD") or read_password("rabbitmq_password") or ""
     host: str
@@ -62,6 +77,8 @@ class MsgBrSettings(BaseModel):
     @computed_field
     @property
     def url(self) -> str:
+        """Build the broker URL."""
+
         encoded_user = quote(self.user)
 
         encoded_password = quote(self.password)
@@ -70,6 +87,8 @@ class MsgBrSettings(BaseModel):
 
 
 class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -92,6 +111,8 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    """Return cached application settings."""
+
     return Settings()  # pyright: ignore[reportCallIssue]
 
 

@@ -11,3 +11,6 @@ wheels/
 
 .env
 secrets/
+
+.mypy_cache/
+.pytest_cache/

@@ -9,11 +9,11 @@ from src.infrastructure.database.models.base import Base
 
 
 class Outbox(Base):
+    """Outbox message ORM model."""
+
     __tablename__ = "outbox_messages"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-
-    # Which Broker Message queue send to
     routing_key: Mapped[str] = mapped_column(String(255), nullable=False)
 
     payload: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
