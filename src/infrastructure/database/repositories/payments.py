@@ -15,7 +15,19 @@ class SQLAlchemyPaymentRepository(AbstractPaymentRepository):
 
     @staticmethod
     def __mapper_dao_to_dm(dao: PaymentModel) -> PaymentEntity:
-        return PaymentEntity.model_validate(dao)
+        data = {
+            "id": dao.id,
+            "amount": dao.amount,
+            "currency": dao.currency,
+            "description": dao.description,
+            "metadata": dao.payment_metadata,
+            "status": dao.status,
+            "idempotency_key": dao.idempotency_key,
+            "webhook_url": dao.webhook_url,
+            "created_at": dao.created_at,
+            "processed_at": dao.processed_at,
+        }
+        return PaymentEntity.model_validate(data)
 
     @staticmethod
     def __mapper_dm_to_dao(dm: PaymentEntity) -> PaymentModel:

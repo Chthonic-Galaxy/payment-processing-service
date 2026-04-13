@@ -4,6 +4,6 @@ __all__ = (
     "Outbox",
 )
 
-from base import Base
-from outbox import Outbox
-from payment import Payment
+from src.infrastructure.database.models.base import Base
+from src.infrastructure.database.models.outbox import Outbox
+from src.infrastructure.database.models.payment import Payment

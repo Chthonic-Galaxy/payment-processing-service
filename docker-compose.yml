@@ -1,0 +1,120 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: payment_rabbitmq
+    ports:
+      - "5672:5672" # AMQP protoco
+      - "15672:15672" # Management UI (login guest / pass guest)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db:
+    container_name: payment_database
+    image: postgres:18-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=payment_db
+      - POSTGRES_USER=payment_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
+    secrets:
+      - pg_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -p 5432 -U payment_user -d payment_db",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  migration:
+    build: .
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      - DATABASE__HOST=db
+      - DATABASE__PORT=5432
+      - DATABASE__USER=payment_user
+      - DATABASE__NAME=payment_db
+    secrets:
+      - pg_password
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: .
+    container_name: payment_api
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE__HOST=db
+      - DATABASE__PORT=5432
+      - DATABASE__USER=payment_user
+      - DATABASE__NAME=payment_db
+    secrets:
+      - pg_password
+    env_file: .env
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  consumer:
+    build: .
+    container_name: payment_consumer
+    command: ["faststream", "run", "src.infrastructure.broker.consumer:app"]
+    environment:
+      - DATABASE__HOST=db
+      - DATABASE__PORT=5432
+      - DATABASE__USER=payment_user
+      - DATABASE__NAME=payment_db
+    secrets:
+      - pg_password
+    env_file: .env
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  outbox_worker:
+    build: .
+    container_name: payment_outbox_worker
+    command: ["python", "-m", "src.infrastructure.workers.run_outbox"]
+    environment:
+      - DATABASE__HOST=db
+      - DATABASE__PORT=5432
+      - DATABASE__USER=payment_user
+      - DATABASE__NAME=payment_db
+    secrets:
+      - pg_password
+    env_file: .env
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  rabbitmq_data:
+
+secrets:
+  pg_password:
+    file: ./secrets/pg_password.txt

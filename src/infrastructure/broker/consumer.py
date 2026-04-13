@@ -3,8 +3,10 @@ import logging
 import random
 from typing import Any
 
+from faststream import FastStream
 from faststream.rabbit import RabbitBroker, RabbitQueue
 
+from src.config import settings
 from src.core.entities.payment import PaymentStatus
 from src.infrastructure.database.connection import async_session_factory
 from src.infrastructure.database.repositories.payments import SQLAlchemyPaymentRepository
@@ -12,8 +14,8 @@ from src.infrastructure.webhook.client import WebhookClient
 
 logger = logging.getLogger(__name__)
 
-# TODO: В будущем вынесем URL RabbitMQ в config.py
-broker = RabbitBroker("amqp://guest:guest@localhost:5672/")
+broker = RabbitBroker(settings.broker.url)
+app = FastStream(broker)
 
 dlq = RabbitQueue("payments.dlq")
 
