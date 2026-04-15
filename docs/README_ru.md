@@ -34,6 +34,10 @@ mkdir -p secrets
 echo "your_secure_db_password" > secrets/pg_password.txt
 echo "your_secure_rmq_password" > secrets/rabbitmq_password.txt
 ```
+Замените значения на свои в `.env.example` и скопируйте в `.env`
+```bash
+cp .env.example .env
+```
 
 ### 2. Запуск инфраструктуры
 Поднимите всю систему (Postgres, RabbitMQ, API, Consumer и Outbox Worker) одной командой через Docker Compose:
