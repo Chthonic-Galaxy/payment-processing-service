@@ -34,6 +34,10 @@ mkdir -p secrets
 echo "your_secure_db_password" > secrets/pg_password.txt
 echo "your_secure_rmq_password" > secrets/rabbitmq_password.txt
 ```
+Replace values in `.env.example` by yours and copy it into `.env`
+```bash
+cp .env.example .env
+```
 
 ### 2. Run the Infrastructure
 Spin up the entire ecosystem (Postgres, RabbitMQ, API, Consumer, and Outbox Worker) using Docker Compose:
