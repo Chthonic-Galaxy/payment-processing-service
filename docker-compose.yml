@@ -63,6 +63,7 @@ services:
       - DATABASE__PORT=5432
       - DATABASE__USER=payment_user
       - DATABASE__NAME=payment_db
+      - BROKER__HOST=rabbitmq
     secrets:
       - pg_password
     env_file: .env
@@ -82,6 +83,7 @@ services:
       - DATABASE__PORT=5432
       - DATABASE__USER=payment_user
       - DATABASE__NAME=payment_db
+      - BROKER__HOST=rabbitmq
     secrets:
       - pg_password
     env_file: .env
@@ -101,6 +103,7 @@ services:
       - DATABASE__PORT=5432
       - DATABASE__USER=payment_user
       - DATABASE__NAME=payment_db
+      - BROKER__HOST=rabbitmq
     secrets:
       - pg_password
     env_file: .env
